@@ -1,4 +1,4 @@
-/*
+﻿/*
    AngelCode Bitmap Font Generator
    Copyright (c) 2004-2016 Andreas Jonsson
   
@@ -1669,11 +1669,11 @@ int CFontGen::SaveFont(const char *szFile)
 	}
 	else if( fontDescFormat == 0 )
 	{
-		fprintf(f, "info face=\"%s\" size=%d bold=%d italic=%d charset=\"%s\" unicode=%d stretchH=%d smooth=%d aa=%d padding=%d,%d,%d,%d spacing=%d,%d outline=%d\r\n", fontName.c_str(), fontSize, isBold, isItalic, useUnicode ? "" : GetCharSetName(charSet).c_str(), useUnicode, scaleH, useSmoothing, aa, paddingUp, paddingRight, paddingDown, paddingLeft, spacingHoriz, spacingVert, outlineThickness);
-		fprintf(f, "common lineHeight=%d base=%d scaleW=%d scaleH=%d pages=%d packed=%d alphaChnl=%d redChnl=%d greenChnl=%d blueChnl=%d\r\n", int(ceilf(height*float(scaleH)/100.0f)), int(ceilf(base*float(scaleH)/100.0f)), outWidth, outHeight, int(numPages), fourChnlPacked, alphaChnl, redChnl, greenChnl, blueChnl);
+		fprintf(f, "info face=\"%s\" size=%d bold=%d italic=%d charset=\"%s\" stretchH=%d smooth=%d aa=%d padding=%d,%d,%d,%d spacing=%d,%d\r\n", fontName.c_str(), fontSize, isBold, isItalic, useUnicode ? "" : GetCharSetName(charSet).c_str(), scaleH, useSmoothing, aa, paddingUp, paddingRight, paddingDown, paddingLeft, spacingHoriz, spacingVert);
+		fprintf(f, "common lineHeight=%d base=%d scaleW=%d scaleH=%d pages=%d\r\n", int(ceilf(height*float(scaleH)/100.0f)), int(ceilf(base*float(scaleH)/100.0f)), outWidth, outHeight, int(numPages));
 
-		for( size_t n = 0; n < numPages; n++ )
-			fprintf(f, "page id=%d file=\"%s_%0*d.%s\"\r\n", (int)n, filenameonly.c_str(), numDigits, (int)n, textureFormat.c_str());
+		//for( size_t n = 0; n < numPages; n++ )
+		//	fprintf(f, "page id=%d file=\"%s_%0*d.%s\"\r\n", (int)n, filenameonly.c_str(), numDigits, (int)n, textureFormat.c_str());
 	}
 	else
 	{
@@ -1789,8 +1789,8 @@ int CFontGen::SaveFont(const char *szFile)
 	if( invalidCharGlyph )
 		numChars++;
 
-	if( fontDescFormat == 0 )
-		fprintf(f, "chars count=%d\r\n", numChars);
+	if( fontDescFormat == 0 ){}
+		// fprintf(f, "chars count=%d\r\n", numChars);
 	else if( fontDescFormat == 1 )
 		fprintf(f, "  <chars count=\"%d\">\r\n", numChars);
 	else if( fontDescFormat == 2 )
@@ -1807,7 +1807,7 @@ int CFontGen::SaveFont(const char *szFile)
 		if( fontDescFormat == 1 )
 			fprintf(f, "    <char id=\"%d\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" xoffset=\"%d\" yoffset=\"%d\" xadvance=\"%d\" page=\"%d\" chnl=\"%d\" />\r\n", -1, invalidCharGlyph->m_x, invalidCharGlyph->m_y, invalidCharGlyph->m_width, invalidCharGlyph->m_height, invalidCharGlyph->m_xoffset, invalidCharGlyph->m_yoffset, invalidCharGlyph->m_advance, invalidCharGlyph->m_page, invalidCharGlyph->m_chnl);
 		else if( fontDescFormat == 0 )
-			fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d chnl=%-2d\r\n", -1, invalidCharGlyph->m_x, invalidCharGlyph->m_y, invalidCharGlyph->m_width, invalidCharGlyph->m_height, invalidCharGlyph->m_xoffset, invalidCharGlyph->m_yoffset, invalidCharGlyph->m_advance, invalidCharGlyph->m_page, invalidCharGlyph->m_chnl);
+			fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", -1, invalidCharGlyph->m_x, invalidCharGlyph->m_y, invalidCharGlyph->m_width, invalidCharGlyph->m_height, invalidCharGlyph->m_xoffset, invalidCharGlyph->m_yoffset, invalidCharGlyph->m_advance, invalidCharGlyph->m_page);
 		else
 		{
 #pragma pack(push)
@@ -1842,6 +1842,45 @@ int CFontGen::SaveFont(const char *szFile)
 		}
 	}
 
+	/* ftp://ftp.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP1252.TXT */
+	/* UCS2 -> XXX(CP1252 + orginal) */
+	std::map<int, int> ucs2Tocp1252;
+	ucs2Tocp1252[0x20AC] = 0x80; /*(€)#EURO SIGN */
+								 /* #UNDEFINED 0x81*/
+	ucs2Tocp1252[0x201A] = 0x82; /*(‚)#SINGLE LOW-9 QUOTATION MARK */
+	ucs2Tocp1252[0x0192] = 0x83; /*(ƒ)#LATIN SMALL LETTER F WITH HOOK */
+	ucs2Tocp1252[0x201E] = 0x84; /*(„)#DOUBLE LOW-9 QUOTATION MARK */
+	ucs2Tocp1252[0x2026] = 0x85; /*(…)#HORIZONTAL ELLIPSIS */
+	ucs2Tocp1252[0x2020] = 0x86; /*(†)#DAGGER */
+	ucs2Tocp1252[0x2021] = 0x87; /*(‡)#DOUBLE DAGGER */
+	ucs2Tocp1252[0x20C6] = 0x88; /*(^)#MODIFIER LETTER CIRCUMFLEX ACCENT */
+	ucs2Tocp1252[0x2030] = 0x89; /*(‰)#PER MILLE SIGN */
+	ucs2Tocp1252[0x0160] = 0x8A; /*(Š)#LATIN CAPITAL LETTER S WITH CARON */
+	ucs2Tocp1252[0x2039] = 0x8B; /*(‹)#SINGLE LEFT-POINTING ANGLE QUOTATION MARK */
+	ucs2Tocp1252[0x0152] = 0x8C; /*(Œ)#LATIN CAPITAL LIGATURE OE */
+								 /* #UNDEFINED 0x8D */
+	ucs2Tocp1252[0x017D] = 0x8E; /*(Ž)#LATIN CAPITAL LETTER Z WITH CARON */
+								 /* #UNDEFINED 0x8F */
+								 /* #UNDEFINED 0x90 */
+	ucs2Tocp1252[0x2018] = 0x91; /*(‘)#LEFT SINGLE QUOTATION MARK */
+	ucs2Tocp1252[0x2019] = 0x92; /*(’)#RIGHT SINGLE QUOTATION MARK */
+	ucs2Tocp1252[0x201C] = 0x93; /*(“)#LEFT DOUBLE QUOTATION MARK */
+	ucs2Tocp1252[0x201D] = 0x94; /*(”)#RIGHT DOUBLE QUOTATION MARK */
+	ucs2Tocp1252[0x2022] = 0x95; /*(•)#BULLET */
+	ucs2Tocp1252[0x2013] = 0x96; /*(–)#EN DASH */
+	ucs2Tocp1252[0x2014] = 0x97; /*(—)#EM DASH */
+	ucs2Tocp1252[0x02DC] = 0x98; /*(˜)#SMALL TILDE */
+	ucs2Tocp1252[0x2122] = 0x99; /*(™)#TRADE MARK SIGN */
+	ucs2Tocp1252[0x0161] = 0x9A; /*(š)#LATIN SMALL LETTER S WITH CARON */
+	ucs2Tocp1252[0x203A] = 0x9B; /*(›)#SINGLE RIGHT-POINTING ANGLE QUOTATION MARK */
+	ucs2Tocp1252[0x0153] = 0x9C; /*(œ)#LATIN SMALL LIGATURE OE */
+								 /* #UNDEFINED 0x9D */
+	ucs2Tocp1252[0x017E] = 0x9E; /*(ž)#LATIN SMALL LETTER Z WITH CARON */
+	ucs2Tocp1252[0x0178] = 0x9F; /*(Ÿ)#LATIN CAPITAL LETTER Y WITH DIAERESIS */
+
+								 /* 波ダッシュ → 全角チルダ */
+	ucs2Tocp1252[0x301C] = 0xFF5E;
+
 	for( n = 0; n < maxChars; n++ )
 	{
         if( chars[n] )
@@ -1853,7 +1892,12 @@ int CFontGen::SaveFont(const char *szFile)
 			if( fontDescFormat == 1 )
 				fprintf(f, "    <char id=\"%d\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" xoffset=\"%d\" yoffset=\"%d\" xadvance=\"%d\" page=\"%d\" chnl=\"%d\" />\r\n", n, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, chars[n]->m_xoffset, chars[n]->m_yoffset, chars[n]->m_advance, page, chnl);
 			else if( fontDescFormat == 0 )
-				fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d chnl=%-2d\r\n", n, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, chars[n]->m_xoffset, chars[n]->m_yoffset, chars[n]->m_advance, page, chnl);
+				if (ucs2Tocp1252.find(n) != ucs2Tocp1252.end()) {
+					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", n, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, chars[n]->m_xoffset, chars[n]->m_yoffset, chars[n]->m_advance, page);
+				}
+				else {
+					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", n, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, chars[n]->m_xoffset, chars[n]->m_yoffset, chars[n]->m_advance, page);
+				}
 			else
 			{
 #pragma pack(push)
@@ -2058,9 +2102,13 @@ int CFontGen::SaveFont(const char *szFile)
 	DeleteDC(dc);
 
 	// Save the image file
-	for( n = 0; n < (signed)pages.size(); n++ )
+	int pageSize = (signed)pages.size();
+	for( n = 0; n < pageSize; n++ )
 	{
 		string str = acStringFormat("%s_%0*d.%s", filename.c_str(), numDigits, n, textureFormat.c_str());
+		if (pageSize == 1) {
+			str = acStringFormat("%s.%s", filename.c_str(), textureFormat.c_str());
+		}
 
 		acImage::Image image;
 		image.width = outWidth;
