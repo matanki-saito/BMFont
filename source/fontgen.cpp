@@ -2103,9 +2103,14 @@ int CFontGen::SaveFont(const char *szFile)
 	DeleteDC(dc);
 
 	// Save the image file
-	for( n = 0; n < (signed)pages.size(); n++ )
+	int pageSize = (signed)pages.size();
+	for( n = 0; n < pageSize; n++ )
 	{
 		string str = acStringFormat("%s_%0*d.%s", filename.c_str(), numDigits, n, textureFormat.c_str());
+		if (pageSize == 1) {
+			acStringFormat("%s.%s", filename.c_str(),textureFormat.c_str());
+		}
+
 
 		acImage::Image image;
 		image.width = outWidth;
