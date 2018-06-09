@@ -2114,7 +2114,7 @@ int CFontGen::SaveFont(const char *szFile)
 	{
 		string str = acStringFormat("%s_%0*d.%s", filename.c_str(), numDigits, n, textureFormat.c_str());
 		if (pageSize == 1) {
-			acStringFormat("%s.%s", filename.c_str(),textureFormat.c_str());
+			str = acStringFormat("%s.%s", filename.c_str(),textureFormat.c_str());
 		}
 
 
