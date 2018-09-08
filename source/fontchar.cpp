@@ -33,6 +33,13 @@
 #include "dynamic_funcs.h"
 #include <assert.h>
 
+unsigned char get_SDF_radial(
+	unsigned char *fontmap,
+	int w, int h,
+	int x, int y,
+	int max_radius,
+	int step_radius);
+
 CFontChar::CFontChar()
 {
 	m_charImg = 0;
@@ -388,6 +395,9 @@ int CFontChar::DrawGlyphFromOutline(HDC dc, int ch, int fontHeight, int fontAsce
 	SelectObject(dc, oldPen);
 	DeleteObject(pen);
 	DeleteObject(bm);
+
+	// Distance Field実装してみる
+	DistanceField();
 
 	DownscaleImage(gen->IsUsingSmoothing());
 	m_width   /= 8;
@@ -1053,6 +1063,236 @@ int CFontChar::DrawGlyph(HFONT font, int ch, const CFontGen *gen)
 	DeleteDC(dc);
 
 	return 0;
+}
+
+void CFontChar::DistanceField() {
+
+	// dest
+	cImage dest;
+	dest.Create(m_charImg->width, m_charImg->height);
+
+	// 単位はバイト
+	BYTE* destPImg = (BYTE*) dest.pixels;
+	BYTE* srcPImg = (BYTE*) m_charImg->pixels;
+
+	// 単位はピクセル
+	const int w = m_charImg->width;
+	const int h = m_charImg->height;
+
+	// 二値化する必要があるかを判定する
+	bool needs_threshold = false;
+	int vmax, vmin;
+	{
+		int val0 = m_charImg->pixels[0], val = -1;
+		vmin = m_charImg->pixels[0];
+		vmax = m_charImg->pixels[0];
+		for (int i = 0; i < w*h; ++i)
+		{
+			//	do I need a threshold?
+			if (m_charImg->pixels[i] != val0)
+			{
+				if (val < 0)
+				{
+					//	second value
+					val = m_charImg->pixels[i];
+				}
+				else
+				{
+					needs_threshold = (val != m_charImg->pixels[i]);
+				}
+			}
+			//	find min and max, just in case
+			if (m_charImg->pixels[i] < vmin)
+			{
+				vmin = m_charImg->pixels[i];
+			}
+			if (m_charImg->pixels[i] > vmax)
+			{
+				vmax = m_charImg->pixels[i];
+			}
+		}
+	}
+
+	// 二値化する必要がある場合に二値化する
+	if (needs_threshold)
+	{
+		int thresh = 127;
+		if (thresh <= vmin)
+		{
+			thresh = vmin + 1;
+		}
+		else if (thresh > vmax)
+		{
+			thresh = vmax;
+		}
+		for (int i = 0; i < w*h; ++i)
+		{
+			if (m_charImg->pixels[i] < thresh)
+			{
+				m_charImg->pixels[i] = 0;
+			}
+			else
+			{
+				m_charImg->pixels[i] = 255;
+			}
+		}
+	}
+	//	OK, I'm finally ready to perform the SDF analysis
+	int sw = 30;
+	int step = 2;
+
+	for (int j = 0; j < m_charImg->height; ++j)
+	{
+		for (int i = 0; i < m_charImg->width ; ++i)
+		{
+			int sx = i * (w - 1) / (m_charImg->width - 1);
+			int sy = j * (h - 1) / (m_charImg->height - 1);
+
+			int pd_idx = (i + j * m_charImg->width) * 4;
+
+			destPImg[pd_idx] = get_SDF_radial(srcPImg, w, h, sx, sy, sw, step);
+			destPImg[pd_idx + 1] = destPImg[pd_idx];
+			destPImg[pd_idx + 2] = destPImg[pd_idx];
+			destPImg[pd_idx + 3] = destPImg[pd_idx];
+		}
+	}
+
+	// Move the pixels to the charImg member
+	m_charImg->width = dest.width;
+	m_charImg->height = dest.height;
+	delete[] m_charImg->pixels;
+	m_charImg->pixels = dest.pixels;
+	dest.pixels = 0;
+}
+
+unsigned char get_SDF_radial(
+	unsigned char *fontmap,
+	int w, int h,
+	int x, int y,
+	int max_radius,
+	int step_radius)
+{
+	//	hideous brute force method
+	float d2 = max_radius * max_radius + 1.0;
+	unsigned char v = fontmap[(x + y * w)*4];
+	for (int radius = 1; (radius <= max_radius) && (radius*radius < d2); radius+= step_radius)
+	{
+		int line, lo, hi;
+		//	north
+		line = y - radius;
+		if ((line >= 0) && (line < h))
+		{
+			lo = x - radius;
+			hi = x + radius;
+			if (lo < 0) { lo = 0; }
+			if (hi >= w) { hi = w - 1; }
+			int idx = line * w + lo;
+			for (int i = lo; i <= hi; ++i)
+			{
+				//	check this pixel
+				if (fontmap[idx*4] != v)
+				{
+					float nx = i - x;
+					float ny = line - y;
+					float nd2 = nx * nx + ny * ny;
+					if (nd2 < d2)
+					{
+						d2 = nd2;
+					}
+				}
+				//	move on
+				++idx;
+			}
+		}
+		//	south
+		line = y + radius;
+		if ((line >= 0) && (line < h))
+		{
+			lo = x - radius;
+			hi = x + radius;
+			if (lo < 0) { lo = 0; }
+			if (hi >= w) { hi = w - 1; }
+			int idx = line * w + lo;
+			for (int i = lo; i <= hi; ++i)
+			{
+				//	check this pixel
+				if (fontmap[idx*4] != v)
+				{
+					float nx = i - x;
+					float ny = line - y;
+					float nd2 = nx * nx + ny * ny;
+					if (nd2 < d2)
+					{
+						d2 = nd2;
+					}
+				}
+				//	move on
+				++idx;
+			}
+		}
+		//	west
+		line = x - radius;
+		if ((line >= 0) && (line < w))
+		{
+			lo = y - radius + 1;
+			hi = y + radius - 1;
+			if (lo < 0) { lo = 0; }
+			if (hi >= h) { hi = h - 1; }
+			int idx = lo * w + line;
+			for (int i = lo; i <= hi; ++i)
+			{
+				//	check this pixel
+				if (fontmap[idx*4] != v)
+				{
+					float nx = line - x;
+					float ny = i - y;
+					float nd2 = nx * nx + ny * ny;
+					if (nd2 < d2)
+					{
+						d2 = nd2;
+					}
+				}
+				//	move on
+				idx += w;
+			}
+		}
+		//	east
+		line = x + radius;
+		if ((line >= 0) && (line < w))
+		{
+			lo = y - radius + 1;
+			hi = y + radius - 1;
+			if (lo < 0) { lo = 0; }
+			if (hi >= h) { hi = h - 1; }
+			int idx = lo * w + line;
+			for (int i = lo; i <= hi; ++i)
+			{
+				//	check this pixel
+				if (fontmap[idx*4] != v)
+				{
+					float nx = line - x;
+					float ny = i - y;
+					float nd2 = nx * nx + ny * ny;
+					if (nd2 < d2)
+					{
+						d2 = nd2;
+					}
+				}
+				//	move on
+				idx += w;
+			}
+		}
+	}
+	d2 = sqrtf(d2);
+	if (v == 0)
+	{
+		d2 = -d2;
+	}
+	d2 *= 127.5 / max_radius;
+	d2 += 127.5;
+	if (d2 < 0.0) d2 = 0.0;
+	if (d2 > 255.0) d2 = 255.0;
+	return (unsigned char)(d2 + 0.5);
 }
 
 void CFontChar::DownscaleImage(bool useSmoothing)

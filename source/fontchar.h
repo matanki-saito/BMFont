@@ -43,6 +43,7 @@ public:
 	void AddOutline(int thickness);
 
 	int  DrawGlyph(HFONT font, int glyph, const CFontGen *gen);
+	void DistanceField();
 	int  DrawGlyphFromOutline(HDC dc, int glyph, int fontHeight, int fontAscent, const CFontGen *gen);
 	int  DrawGlyphFromBitmap(HDC dc, int glyph, int fontHeight, int fontAscent, const CFontGen *gen);
 
