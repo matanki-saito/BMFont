@@ -1669,11 +1669,11 @@ int CFontGen::SaveFont(const char *szFile)
 	}
 	else if( fontDescFormat == 0 )
 	{
-		fprintf(f, "info face=\"%s\" size=%d bold=%d italic=%d charset=\"%s\" unicode=%d stretchH=%d smooth=%d aa=%d padding=%d,%d,%d,%d spacing=%d,%d outline=%d\r\n", fontName.c_str(), fontSize, isBold, isItalic, useUnicode ? "" : GetCharSetName(charSet).c_str(), useUnicode, scaleH, useSmoothing, aa, paddingUp, paddingRight, paddingDown, paddingLeft, spacingHoriz, spacingVert, outlineThickness);
-		fprintf(f, "common lineHeight=%d base=%d scaleW=%d scaleH=%d pages=%d packed=%d alphaChnl=%d redChnl=%d greenChnl=%d blueChnl=%d\r\n", int(ceilf(height*float(scaleH)/100.0f)), int(ceilf(base*float(scaleH)/100.0f)), outWidth, outHeight, int(numPages), fourChnlPacked, alphaChnl, redChnl, greenChnl, blueChnl);
+		fprintf(f, "info face=\"%s\" size=%d bold=%d italic=%d charset=\"%s\" stretchH=%d smooth=%d aa=%d padding=%d,%d,%d,%d spacing=%d,%d\r\n", fontName.c_str(), fontSize, isBold, isItalic, useUnicode ? "" : GetCharSetName(charSet).c_str(), scaleH, useSmoothing, aa, paddingUp, paddingRight, paddingDown, paddingLeft, spacingHoriz, spacingVert);
+		fprintf(f, "common lineHeight=%d base=%d scaleW=%d scaleH=%d pages=%d\r\n", int(ceilf(height*float(scaleH)/100.0f)), int(ceilf(base*float(scaleH)/100.0f)), outWidth, outHeight, int(numPages));
 
-		for( size_t n = 0; n < numPages; n++ )
-			fprintf(f, "page id=%d file=\"%s_%0*d.%s\"\r\n", (int)n, filenameonly.c_str(), numDigits, (int)n, textureFormat.c_str());
+		//for( size_t n = 0; n < numPages; n++ )
+		//	fprintf(f, "page id=%d file=\"%s_%0*d.%s\"\r\n", (int)n, filenameonly.c_str(), numDigits, (int)n, textureFormat.c_str());
 	}
 	else
 	{
@@ -1789,8 +1789,8 @@ int CFontGen::SaveFont(const char *szFile)
 	if( invalidCharGlyph )
 		numChars++;
 
-	if( fontDescFormat == 0 )
-		fprintf(f, "chars count=%d\r\n", numChars);
+	if( fontDescFormat == 0 ){}
+		// fprintf(f, "chars count=%d\r\n", numChars);
 	else if( fontDescFormat == 1 )
 		fprintf(f, "  <chars count=\"%d\">\r\n", numChars);
 	else if( fontDescFormat == 2 )
@@ -1807,7 +1807,7 @@ int CFontGen::SaveFont(const char *szFile)
 		if( fontDescFormat == 1 )
 			fprintf(f, "    <char id=\"%d\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" xoffset=\"%d\" yoffset=\"%d\" xadvance=\"%d\" page=\"%d\" chnl=\"%d\" />\r\n", -1, invalidCharGlyph->m_x, invalidCharGlyph->m_y, invalidCharGlyph->m_width, invalidCharGlyph->m_height, invalidCharGlyph->m_xoffset, invalidCharGlyph->m_yoffset, invalidCharGlyph->m_advance, invalidCharGlyph->m_page, invalidCharGlyph->m_chnl);
 		else if( fontDescFormat == 0 )
-			fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d chnl=%-2d\r\n", -1, invalidCharGlyph->m_x, invalidCharGlyph->m_y, invalidCharGlyph->m_width, invalidCharGlyph->m_height, invalidCharGlyph->m_xoffset, invalidCharGlyph->m_yoffset, invalidCharGlyph->m_advance, invalidCharGlyph->m_page, invalidCharGlyph->m_chnl);
+			fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", -1, invalidCharGlyph->m_x, invalidCharGlyph->m_y, invalidCharGlyph->m_width, invalidCharGlyph->m_height, invalidCharGlyph->m_xoffset, invalidCharGlyph->m_yoffset, invalidCharGlyph->m_advance, invalidCharGlyph->m_page);
 		else
 		{
 #pragma pack(push)
