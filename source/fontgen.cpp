@@ -1881,20 +1881,58 @@ int CFontGen::SaveFont(const char *szFile)
 	/* 波ダッシュ → 全角チルダ */
 	ucs2Tocp1252[0x301C] = 0xFF5E;
 
+	/* 約物リスト codepoint=divideParam */
+	/* 
+	1 = 後ろ半分を削る
+	2 = 前半分を削る
+	*/
+	std::map<int, int> yakumono;
+	yakumono[0x3002] = 1; // 。
+	yakumono[0x3001] = 1; // 、
+	yakumono[0xff08] = 2; // （
+	yakumono[0xff09] = 1; // ）
+	yakumono[0x300c] = 2; // 「
+	yakumono[0x300d] = 1; // 」
+	yakumono[0xff5b] = 2; //｛
+	yakumono[0xff5d] = 1; //｝
+
 	for( n = 0; n < maxChars; n++ )
 	{
+		//　日付用
+		if (n == 14 && chars[0x65E5]) { // 日
+			chars[n] = chars[0x65E5];
+		}else if (n == 15 && chars[0x5E74]) { //年 
+			chars[n] = chars[0x5E74];
+		}
 
         if( chars[n] )
 		{
 			int page, chnl;
 			page = chars[n]->m_page;
 			chnl = chars[n]->m_chnl;
+
+			int xadv = chars[n]->m_advance;
+			int xoff = chars[n]->m_xoffset;
+
+			if (yakumono.find(n) != yakumono.end()) {
+				switch (yakumono[n]) {
+				case 1:
+					xadv = ceil((double)xadv / 2.0);
+					break;
+				case 2:
+					xadv = ceil((double)xadv / 2.0);
+					xoff += xadv;
+					break;
+				default:
+					break;
+				}
+			}
 			
 			if( fontDescFormat == 1 )
-				fprintf(f, "    <char id=\"%d\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" xoffset=\"%d\" yoffset=\"%d\" xadvance=\"%d\" page=\"%d\" chnl=\"%d\" />\r\n", n, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, chars[n]->m_xoffset, chars[n]->m_yoffset, chars[n]->m_advance, page, chnl);
+				fprintf(f, "    <char id=\"%d\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" xoffset=\"%d\" yoffset=\"%d\" xadvance=\"%d\" page=\"%d\" chnl=\"%d\" />\r\n", n, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, chars[n]->m_yoffset, xadv, page, chnl);
 			else if (fontDescFormat == 0) {
 			    if (ucs2Tocp1252.find(n) != ucs2Tocp1252.end()) {
-					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d chnl=%-2d\r\n", ucs2Tocp1252[n], chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, chars[n]->m_xoffset, chars[n]->m_yoffset, chars[n]->m_advance, page, chnl);
+					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d chnl=%-2d\r\n", ucs2Tocp1252[n], chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, chars[n]->m_yoffset, xadv, page, chnl);
 			    }
 			    else {
 					int m = n;
@@ -1902,7 +1940,7 @@ int CFontGen::SaveFont(const char *szFile)
 						m += 0xE000;
 					}
 
-					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d chnl=%-2d\r\n", m, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, chars[n]->m_xoffset, chars[n]->m_yoffset, chars[n]->m_advance, page, chnl);
+					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d chnl=%-2d\r\n", m, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, chars[n]->m_yoffset, xadv, page, chnl);
 			    }			    
 			}
 			else
