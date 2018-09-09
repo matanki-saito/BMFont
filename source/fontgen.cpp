@@ -1921,7 +1921,7 @@ int CFontGen::SaveFont(const char *szFile)
 					break;
 				case 2:
 					xadv = ceil((double)xadv / 2.0);
-					xoff += xadv;
+					xoff -= xadv;
 					break;
 				default:
 					break;
