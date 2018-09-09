@@ -17,12 +17,13 @@
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
 x86/
+x64/
 bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+!libs/*/x64/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
