@@ -1903,6 +1903,8 @@ int CFontGen::SaveFont(const char *szFile)
 			chars[n] = chars[0x65E5];
 		}else if (n == 15 && chars[0x5E74]) { //年 
 			chars[n] = chars[0x5E74];
+		}else if (n == 7 && chars[0x6708]) { // 月
+			chars[n] = chars[0x6708];
 		}
 
         if( chars[n] )
