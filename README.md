@@ -13,10 +13,13 @@ aaa_0.dds ----> aaa.dds
 ## change fnt file format
 
 - fix "info"
+ - remove "unicode"
+ - remove "outline"
 - fix "common"
 - remove "page id" line
-- remove chnl number of char[n]
-- remove page number of char[n]
+- fix char[n]
+ - remove chnl number
+ - remove page number
 - remove "chars count" line
 
 ## YMD character
