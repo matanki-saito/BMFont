@@ -1896,6 +1896,17 @@ int CFontGen::SaveFont(const char *szFile)
 	yakumono[0xff5b] = 2; //｛
 	yakumono[0xff5d] = 1; //｝
 
+	/*
+	メモリマップ.EUの場合。0xB4や0x2850あたりは変動するので、安全を見て0x100-uA00を使えないようにする
+	|-------(0x2850)------ >|--expand-->|
+	| ->(0xB4)              |             : offset
+	|   --->(0x400  )       |             : u0000 - u00FF chars
+	|       ----0x239C----->|             : DO NOT USED AREA : u0100 - u09E6
+	|                       |--expand-->| : u9E6～
+	*/
+	#define PROHIBITED_AREA_BEGIN 0x100
+	#define PROHIBITED_AREA_END 0xA00
+
 	for( n = 0; n < maxChars; n++ )
 	{
 		//　日付用
@@ -1936,12 +1947,12 @@ int CFontGen::SaveFont(const char *szFile)
 			    if (ucs2Tocp1252.find(n) != ucs2Tocp1252.end()) {
 					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", ucs2Tocp1252[n], chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, chars[n]->m_yoffset, xadv, page);
 			    }
-			    else {
+				// unicodeの方も残す
+				{
 					int m = n;
-					if (n > 0xFF && 0xA00 > n) {
+					if (n >= PROHIBITED_AREA_BEGIN && PROHIBITED_AREA_END >= n) {
 						m += 0xE000;
 					}
-
 					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", m, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, chars[n]->m_yoffset, xadv, page);
 			    }			    
 			}
