@@ -1927,19 +1927,19 @@ int CFontGen::SaveFont(const char *szFile)
 			int xadv = chars[n]->m_advance;
 			int xoff = chars[n]->m_xoffset;
 
-			if (yakumono.find(n) != yakumono.end()) {
-				switch (yakumono[n]) {
-				case 1:
-					xadv = ceil((double)xadv / 2.0);
-					break;
-				case 2:
-					xadv = ceil((double)xadv / 2.0);
-					xoff -= xadv;
-					break;
-				default:
-					break;
-				}
-			}
+			//if (yakumono.find(n) != yakumono.end()) {
+			//	switch (yakumono[n]) {
+			//	case 1:
+			//		xadv = ceil((double)xadv / 2.0);
+			//		break;
+			//	case 2:
+			//		xadv = ceil((double)xadv / 2.0);
+			//		xoff -= xadv;
+			//		break;
+			//	default:
+			//		break;
+			//	}
+			//}
 			
 			if( fontDescFormat == 1 )
 				fprintf(f, "    <char id=\"%d\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" xoffset=\"%d\" yoffset=\"%d\" xadvance=\"%d\" page=\"%d\" chnl=\"%d\" />\r\n", n, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, chars[n]->m_yoffset, xadv, page, chnl);
