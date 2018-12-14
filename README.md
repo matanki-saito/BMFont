@@ -31,7 +31,7 @@ Since it is necessary to display it with one byte, I assigned these.
 |0xE|Shift out|day|日(0x65E5)|
 |0xF|Shift in|year|年(0x5E74)|
 |0x7|Bel|month|月(0x6708)|
-
+<!--
 ## harf width character
 
 - shrink type 1 cuts the back half of the character.
@@ -47,7 +47,7 @@ Since it is necessary to display it with one byte, I assigned these.
 |0x300d|」|1|
 |0xff5b|｛|2|
 |0xff5d|｝|1|
-
+-->
 ## wave dash issue
 Translate 0x301C(wave dash) to 0xFF5E(FULLWIDTH TILDE). See [波ダッシュ#Windowsにおいて起きる問題](https://ja.wikipedia.org/wiki/%E6%B3%A2%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5#Windows%E3%81%AB%E3%81%8A%E3%81%84%E3%81%A6%E8%B5%B7%E3%81%8D%E3%82%8B%E5%95%8F%E9%A1%8C).
 
