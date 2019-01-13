@@ -1655,12 +1655,15 @@ int CFontGen::SaveFont(const char *szFile)
 	// Determine the number of digits needed for the page file id
 	int numDigits = numPages > 1 ? int(log10(float(numPages-1))+1) : 1;
 
+	int lineHeight = int(ceilf(height*float(scaleH) / 100.0f));
+
+
 	if( fontDescFormat == 1 ) 
 	{
 		fprintf(f, "<?xml version=\"1.0\"?>\r\n");
 		fprintf(f, "<font>\r\n");
 		fprintf(f, "  <info face=\"%s\" size=\"%d\" bold=\"%d\" italic=\"%d\" charset=\"%s\" unicode=\"%d\" stretchH=\"%d\" smooth=\"%d\" aa=\"%d\" padding=\"%d,%d,%d,%d\" spacing=\"%d,%d\" outline=\"%d\"/>\r\n", fontName.c_str(), fontSize, isBold, isItalic, useUnicode ? "" : GetCharSetName(charSet).c_str(), useUnicode, scaleH, useSmoothing, aa, paddingUp, paddingRight, paddingDown, paddingLeft, spacingHoriz, spacingVert, outlineThickness);
-		fprintf(f, "  <common lineHeight=\"%d\" base=\"%d\" scaleW=\"%d\" scaleH=\"%d\" pages=\"%d\" packed=\"%d\" alphaChnl=\"%d\" redChnl=\"%d\" greenChnl=\"%d\" blueChnl=\"%d\"/>\r\n", int(ceilf(height*float(scaleH)/100.0f)), int(ceilf(base*float(scaleH)/100.0f)), outWidth, outHeight, int(numPages), fourChnlPacked, alphaChnl, redChnl, greenChnl, blueChnl);
+		fprintf(f, "  <common lineHeight=\"%d\" base=\"%d\" scaleW=\"%d\" scaleH=\"%d\" pages=\"%d\" packed=\"%d\" alphaChnl=\"%d\" redChnl=\"%d\" greenChnl=\"%d\" blueChnl=\"%d\"/>\r\n", lineHeight, int(ceilf(base*float(scaleH)/100.0f)), outWidth, outHeight, int(numPages), fourChnlPacked, alphaChnl, redChnl, greenChnl, blueChnl);
 
 		fprintf(f, "  <pages>\r\n");
 		for( size_t n = 0; n < numPages; n++ )
@@ -1670,7 +1673,7 @@ int CFontGen::SaveFont(const char *szFile)
 	else if( fontDescFormat == 0 )
 	{
 		fprintf(f, "info face=\"%s\" size=%d bold=%d italic=%d charset=\"%s\" stretchH=%d smooth=%d aa=%d padding=%d,%d,%d,%d spacing=%d,%d\r\n", fontName.c_str(), fontSize, isBold, isItalic, useUnicode ? "" : GetCharSetName(charSet).c_str(), scaleH, useSmoothing, aa, paddingUp, paddingRight, paddingDown, paddingLeft, spacingHoriz, spacingVert);
-		fprintf(f, "common lineHeight=%d base=%d scaleW=%d scaleH=%d pages=%d\r\n", int(ceilf(height*float(scaleH)/100.0f)), int(ceilf(base*float(scaleH)/100.0f)), outWidth, outHeight, int(numPages));
+		fprintf(f, "common lineHeight=%d base=%d scaleW=%d scaleH=%d pages=%d\r\n", lineHeight, int(ceilf(base*float(scaleH)/100.0f)), outWidth, outHeight, int(numPages));
 
 		//for( size_t n = 0; n < numPages; n++ )
 		//	fprintf(f, "page id=%d file=\"%s_%0*d.%s\"\r\n", (int)n, filenameonly.c_str(), numDigits, (int)n, textureFormat.c_str());
@@ -1927,6 +1930,10 @@ int CFontGen::SaveFont(const char *szFile)
 			int xadv = chars[n]->m_advance;
 			int xoff = chars[n]->m_xoffset;
 
+			int yoff = chars[n]->m_yoffset;
+
+			yoff -= floor(lineHeight/10.0);
+
 			//if (yakumono.find(n) != yakumono.end()) {
 			//	switch (yakumono[n]) {
 			//	case 1:
@@ -1953,7 +1960,7 @@ int CFontGen::SaveFont(const char *szFile)
 					if (n >= PROHIBITED_AREA_BEGIN && PROHIBITED_AREA_END >= n) {
 						m += 0xE000;
 					}
-					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", m, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, chars[n]->m_yoffset, xadv, page);
+					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", m, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, yoff, xadv, page);
 			    }			    
 			}
 			else
