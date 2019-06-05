@@ -1921,6 +1921,14 @@ int CFontGen::SaveFont(const char *szFile)
 			chars[n] = chars[0x6708];
 		}
 
+		// issue-21: https://github.com/matanki-saito/BMFont/issues/21
+		if (n == 10000 && chars[26397]) { // ✐ → 朝
+			chars[n] = chars[26397];
+		}
+		else if (n == 10001 && chars[27663]) { // ✑ → 氏 
+			chars[n] = chars[27663];
+		}
+
         if( chars[n] )
 		{
 			int page, chnl;
