@@ -950,9 +950,12 @@ void CCharWin::OnChooseFont()
 	dlg.fontSize                = fontGen->GetFontSize();
 	dlg.isBold                  = fontGen->IsBold();
 	dlg.isItalic                = fontGen->IsItalic();
+	dlg.isHalfYakumono          = fontGen->IsHalfYakumono();
 	dlg.antiAliasing            = fontGen->GetAntiAliasingLevel();
 	dlg.useSmoothing            = fontGen->IsUsingSmoothing();
 	dlg.scaleH                  = fontGen->GetScaleHeight();
+	dlg.xScaleH                 = fontGen->GetXScaleHorizontal();
+	dlg.xScaleV                 = fontGen->GetXScaleVertical();
 	dlg.useUnicode              = fontGen->IsUsingUnicode();
 	dlg.renderFromOutline       = fontGen->GetRenderFromOutline();
 	dlg.useHinting              = fontGen->GetUseHinting();
@@ -972,10 +975,13 @@ void CCharWin::OnChooseFont()
 		fontGen->SetCharSet(dlg.charSet);
 		fontGen->SetFontSize(dlg.fontSize);
 		fontGen->SetBold(dlg.isBold);
+		fontGen->SetHalfYakumono(dlg.isHalfYakumono);
 		fontGen->SetItalic(dlg.isItalic);
 		fontGen->SetAntiAliasingLevel(dlg.antiAliasing);
 		fontGen->SetUseSmoothing(dlg.useSmoothing);
 		fontGen->SetScaleHeight(dlg.scaleH);
+		fontGen->SetXScaleHorizontal(dlg.xScaleH);
+		fontGen->SetXScaleVertical(dlg.xScaleV);
 		fontGen->SetUseUnicode(dlg.useUnicode);
 		fontGen->SetUseHinting(dlg.useHinting);
 		fontGen->SetUseClearType(dlg.useClearType);
