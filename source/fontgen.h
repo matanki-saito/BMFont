@@ -132,6 +132,7 @@ public:
 	int     GetCharSet() const;            int SetCharSet(int charSet);
 	int     GetFontSize() const;           int SetFontSize(int fontSize);
 	bool    IsBold() const;                int SetBold(bool set);
+	bool    IsHalfYakumono() const;        int SetHalfYakumono(bool set);
 	bool    IsItalic() const;              int SetItalic(bool set);
 	int     GetAntiAliasingLevel() const;  int SetAntiAliasingLevel(int level);
 	bool    IsUsingSmoothing() const;      int SetUseSmoothing(bool set);
@@ -148,6 +149,8 @@ public:
 	int     GetSpacingHoriz() const;       int SetSpacingHoriz(int space);
 	int     GetSpacingVert() const;        int SetSpacingVert(int space);
 	int     GetScaleHeight() const;        int SetScaleHeight(int scale);
+	int     GetXScaleHorizontal() const;   int SetXScaleHorizontal(int scale);
+	int     GetXScaleVertical() const;     int SetXScaleVertical(int scale);
 	bool    GetFixedHeight() const;        int SetFixedHeight(bool fixed);
 	bool    GetForceZero() const;          int SetForceZero(bool force);
 									
@@ -220,8 +223,11 @@ protected:
 	int    fontSize;
 	int    aa;
 	int    scaleH;
+	int    xScaleH;
+	int    xScaleV;
 	bool   useSmoothing;
 	bool   isBold;
+	bool   isHalfYakumono;
 	bool   isItalic;
 	bool   useUnicode;
 	bool   renderFromOutline;

@@ -771,14 +771,23 @@ int CFontChar::DrawGlyph(HFONT font, int ch, const CFontGen *gen)
 	int fontHeight = int(ceilf(tm.tmHeight*float(gen->GetScaleHeight())/100.0f));
 	int fontAscent = int(ceilf(tm.tmAscent*float(gen->GetScaleHeight())/100.0f));
 
+	float hScale = 1.0f;
+	float vScale = 1.0f;
+
+	// issue-23 : https://github.com/matanki-saito/BMFont/issues/23
+	if ((ch >= 0x3041 && ch <= 0x3096) || (ch >= 0x30A1 && ch <= 0x30FA) || ch == 0x30fc) {
+		hScale = gen->GetXScaleHorizontal()/100.0f;
+		vScale = gen->GetXScaleVertical()/100.0f;
+	}
+
 	// Scale the coordinate system so that the font is stretched
 	if( SetGraphicsMode(dc, GM_ADVANCED) )
 	{
 		XFORM mtx;
-		mtx.eM11 = 1.0f;
+		mtx.eM11 = hScale;
 		mtx.eM12 = 0;
 		mtx.eM21 = 0;
-		mtx.eM22 = float(gen->GetScaleHeight())/100.0f;
+		mtx.eM22 = (float(gen->GetScaleHeight())/100.0f ) * vScale;
 		mtx.eDx = 0;
 		mtx.eDy = 0;
 		SetWorldTransform(dc, &mtx);
@@ -1010,6 +1019,8 @@ int CFontChar::DrawGlyph(HFONT font, int ch, const CFontGen *gen)
 		m_charImg->height = m_height;
 	}
 
+	m_advance = floor((float)m_advance * hScale);
+
 	// Adjust offsets and xadvance
 	if( gen->GetForceZero() )
 	{
@@ -1047,6 +1058,9 @@ int CFontChar::DrawGlyph(HFONT font, int ch, const CFontGen *gen)
 			m_charImg = cpy;
 		}
 	}
+
+	
+	m_yoffset = ceil(m_yoffset / vScale);
 
 	// Clean up
 	SelectObject(dc, oldFont);

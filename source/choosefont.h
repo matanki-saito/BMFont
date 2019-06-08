@@ -48,8 +48,11 @@ public:
 	bool   useSmoothing;
 	bool   isBold;
 	bool   isItalic;
+	bool   isHalfYakumono;
 	bool   useUnicode;
 	int    scaleH;
+	int    xScaleV;
+	int    xScaleH;
 	bool   outputInvalidCharGlyph;
 	int    outlineThickness;
 	bool   renderFromOutline;

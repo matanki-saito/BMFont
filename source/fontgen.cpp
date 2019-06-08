@@ -69,6 +69,7 @@ CFontGen::CFontGen()
 	renderFromOutline      = false;
 	isBold                 = false;
 	isItalic               = false;
+	isHalfYakumono         = false;
 	useUnicode             = true;
 	paddingLeft            = 0;
 	paddingRight           = 0;
@@ -79,6 +80,8 @@ CFontGen::CFontGen()
 	disableBoxChars        = true;
 	outputInvalidCharGlyph = false;
 	scaleH                 = 100;
+	xScaleH                = 100;
+	xScaleV                = 100;
 	fixedHeight            = false;
 	forceZero              = false;
 
@@ -676,6 +679,24 @@ int CFontGen::SetScaleHeight(int scale)
 	return 0;
 }
 
+int CFontGen::SetXScaleHorizontal(int scale)
+{
+	if (isWorking) return -1;
+	arePagesGenerated = false;
+
+	xScaleH = scale;
+	return 0;
+}
+
+int CFontGen::SetXScaleVertical(int scale)
+{
+	if (isWorking) return -1;
+	arePagesGenerated = false;
+
+	xScaleV = scale;
+	return 0;
+}
+
 int CFontGen::SetSpacingHoriz(int space)
 {
 	if( isWorking ) return -1;
@@ -811,6 +832,15 @@ int CFontGen::SetBold(bool set)
 	return 0;
 }
 
+int CFontGen::SetHalfYakumono(bool set)
+{
+	if (isWorking) return -1;
+	arePagesGenerated = false;
+
+	isHalfYakumono = set;
+	return 0;
+}
+
 int CFontGen::SetFontSize(int fontSize)
 {
 	if( isWorking ) return -1;
@@ -924,6 +954,16 @@ int CFontGen::GetScaleHeight() const
 	return scaleH;
 }
 
+int CFontGen::GetXScaleHorizontal() const
+{
+	return xScaleH;
+}
+
+int CFontGen::GetXScaleVertical() const
+{
+	return xScaleV;
+}
+
 int CFontGen::GetSpacingHoriz() const
 {
 	return spacingHoriz;
@@ -992,6 +1032,11 @@ bool CFontGen::IsItalic() const
 bool CFontGen::IsBold() const
 {
 	return isBold;
+}
+
+bool CFontGen::IsHalfYakumono() const
+{
+	return isHalfYakumono;
 }
 
 int CFontGen::GetAntiAliasingLevel() const
@@ -1361,6 +1406,7 @@ void CFontGen::InternalGeneratePages()
 			if( chars[n] == 0 )
 			{
 				chars[n] = new CFontChar();
+
 				int r = chars[n]->DrawChar(font, n, this);
 				if( r < 0 )
 				{
@@ -1888,6 +1934,7 @@ int CFontGen::SaveFont(const char *szFile)
 	/* 
 	1 = 後ろ半分を削る
 	2 = 前半分を削る
+	3 = 真ん中を残す
 	*/
 	std::map<int, int> yakumono;
 	yakumono[0x3002] = 1; // 。
@@ -1898,6 +1945,8 @@ int CFontGen::SaveFont(const char *szFile)
 	yakumono[0x300d] = 1; // 」
 	yakumono[0xff5b] = 2; //｛
 	yakumono[0xff5d] = 1; //｝
+	yakumono[0x30Fb] = 3; //・
+	yakumono[0xFF01] = 3; //！
 
 	/*
 	メモリマップ.EUの場合。0xB4や0x2850あたりは変動するので、安全を見て0x100-uA00を使えないようにする
@@ -1940,21 +1989,25 @@ int CFontGen::SaveFont(const char *szFile)
 
 			int yoff = chars[n]->m_yoffset;
 
-			yoff -= floor(lineHeight/10.0);
+			yoff -= floor(lineHeight/10.0f);
 
-			//if (yakumono.find(n) != yakumono.end()) {
-			//	switch (yakumono[n]) {
-			//	case 1:
-			//		xadv = ceil((double)xadv / 2.0);
-			//		break;
-			//	case 2:
-			//		xadv = ceil((double)xadv / 2.0);
-			//		xoff -= xadv;
-			//		break;
-			//	default:
-			//		break;
-			//	}
-			//}
+			if (isHalfYakumono && yakumono.find(n) != yakumono.end()) {
+				switch (yakumono[n]) {
+				case 1:
+					xadv = ceil((double)xadv / 2.0);
+					break;
+				case 2:
+					xadv = ceil((double)xadv / 2.0);
+					xoff -= xadv;
+					break;
+				case 3:
+					xadv = ceil((double)xadv / 2.0);
+					xoff -= ceil((double)xadv / 4.0);
+					break;
+				default:
+					break;
+				}
+			}
 			
 			if( fontDescFormat == 1 )
 				fprintf(f, "    <char id=\"%d\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" xoffset=\"%d\" yoffset=\"%d\" xadvance=\"%d\" page=\"%d\" chnl=\"%d\" />\r\n", n, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, chars[n]->m_yoffset, xadv, page, chnl);
@@ -1969,7 +2022,7 @@ int CFontGen::SaveFont(const char *szFile)
 						m += 0xE000;
 					}
 					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", m, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, yoff, xadv, page);
-			    }			    
+			    }
 			}
 			else
 			{
@@ -2396,8 +2449,11 @@ int CFontGen::LoadConfiguration(const char *filename)
 	int    _fontSize;               config.GetAttrAsInt("fontSize", _fontSize, 0, 32);
 	int    _aa;                     config.GetAttrAsInt("aa", _aa, 0, 1);
 	int    _scaleH;                 config.GetAttrAsInt("scaleH", _scaleH, 0, 100);
+	int    _xScaleH;                config.GetAttrAsInt("xScaleH", _xScaleH, 0, 100);
+	int    _xScaleV;                config.GetAttrAsInt("xScaleV", _xScaleV, 0, 100);
 	bool   _useSmoothing;           config.GetAttrAsBool("useSmoothing", _useSmoothing, 0, true);
 	bool   _isBold;                 config.GetAttrAsBool("isBold", _isBold, 0, false);
+	bool   _isHalfYakumono;         config.GetAttrAsBool("isHalfYakumono", _isHalfYakumono, 0, false);
 	bool   _isItalic;               config.GetAttrAsBool("isItalic", _isItalic, 0, false);
 	bool   _useUnicode;             config.GetAttrAsBool("useUnicode", _useUnicode, 0, true);
 	bool   _useHinting;             config.GetAttrAsBool("useHinting", _useHinting, 0, true);
@@ -2499,6 +2555,8 @@ int CFontGen::LoadConfiguration(const char *filename)
 	if( pos != string::npos ) _fontName.erase(pos + 1);
 	if( _aa < 1 ) _aa = 1; if( _aa > 4 ) _aa = 4;
 	if( _scaleH < 1 ) _scaleH = 1;
+	if (_xScaleH < 1) _xScaleH = 1;
+	if (_xScaleV < 1) _xScaleV = 1;
 	if( _paddingDown < 0 ) _paddingDown = 0;
 	if( _paddingUp < 0 ) _paddingUp = 0;
 	if( _paddingRight < 0 ) _paddingRight = 0;
@@ -2544,11 +2602,14 @@ int CFontGen::LoadConfiguration(const char *filename)
 	SetFontSize(_fontSize);
 	SetAntiAliasingLevel(_aa);
 	SetScaleHeight(_scaleH);
+	SetXScaleHorizontal(_xScaleH);
+	SetXScaleVertical(_xScaleV);
 	SetUseSmoothing(_useSmoothing);
 	SetRenderFromOutline(_renderFromOutline);
 	SetUseHinting(_useHinting);
 	SetUseClearType(_useClearType);
 	SetBold(_isBold);
+	SetHalfYakumono(_isHalfYakumono);
 	SetItalic(_isItalic);
 	SetUseUnicode(_useUnicode);
 	SetPaddingDown(_paddingDown);
