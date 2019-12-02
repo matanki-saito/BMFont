@@ -1984,13 +1984,15 @@ int CFontGen::SaveFont(const char *szFile)
 			page = chars[n]->m_page;
 			chnl = chars[n]->m_chnl;
 
+			int x = chars[n]->m_x;
+			int y = chars[n]->m_y;
+			int width = chars[n]->m_width;
+			int height = chars[n]->m_height;
 			int xadv = chars[n]->m_advance;
 			int xoff = chars[n]->m_xoffset;
-
 			int yoff = chars[n]->m_yoffset;
 
 			yoff -= floor(lineHeight/10.0f);
-
 			if (isHalfYakumono && yakumono.find(n) != yakumono.end()) {
 				switch (yakumono[n]) {
 				case 1:
@@ -2008,12 +2010,38 @@ int CFontGen::SaveFont(const char *szFile)
 					break;
 				}
 			}
+
+			// issue-27
+			if(n == 0x20){
+				height = 0;
+			}
 			
 			if( fontDescFormat == 1 )
-				fprintf(f, "    <char id=\"%d\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" xoffset=\"%d\" yoffset=\"%d\" xadvance=\"%d\" page=\"%d\" chnl=\"%d\" />\r\n", n, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, chars[n]->m_yoffset, xadv, page, chnl);
+				fprintf(f, "    <char id=\"%d\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" xoffset=\"%d\" yoffset=\"%d\" xadvance=\"%d\" page=\"%d\" chnl=\"%d\" />\r\n",
+						n,
+						x,
+						y,
+						width,
+						height,
+						xoff,
+						chars[n]->m_yoffset,
+						xadv,
+						page,
+						chnl
+				);
 			else if (fontDescFormat == 0) {
 			    if (ucs2Tocp1252.find(n) != ucs2Tocp1252.end()) {
-					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", ucs2Tocp1252[n], chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, chars[n]->m_yoffset, xadv, page);
+					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", 
+							ucs2Tocp1252[n],
+							x,
+							y,
+							width,
+							height,
+							xoff,
+							chars[n]->m_yoffset,
+							xadv,
+							page
+					);
 			    }
 				// unicodeの方も残す
 				{
@@ -2021,7 +2049,17 @@ int CFontGen::SaveFont(const char *szFile)
 					if (n >= PROHIBITED_AREA_BEGIN && PROHIBITED_AREA_END >= n) {
 						m += 0xE000;
 					}
-					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n", m, chars[n]->m_x, chars[n]->m_y, chars[n]->m_width, chars[n]->m_height, xoff, yoff, xadv, page);
+					fprintf(f, "char id=%-4d x=%-5d y=%-5d width=%-5d height=%-5d xoffset=%-5d yoffset=%-5d xadvance=%-5d page=%-2d\r\n",
+							m,
+							x,
+							y,
+							width,
+							height,
+							xoff,
+							yoff,
+							xadv,
+							page
+					);
 			    }
 			}
 			else
