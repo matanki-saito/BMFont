@@ -70,7 +70,7 @@ CFontGen::CFontGen()
 	isBold                 = false;
 	isItalic               = false;
 	isHalfYakumono         = false;
-	useUnicode             = true;
+	useUnicode             = false;
 	paddingLeft            = 0;
 	paddingRight           = 0;
 	paddingUp              = 0;
@@ -1992,7 +1992,9 @@ int CFontGen::SaveFont(const char *szFile)
 			int xoff = chars[n]->m_xoffset;
 			int yoff = chars[n]->m_yoffset;
 
-			yoff -= floor(lineHeight/10.0f);
+			// #17でベースラインを調整しているがマップフォントでは長音記号「ー」などで表示が崩れる
+			//yoff -= floor(lineHeight/10.0f);
+
 			if (isHalfYakumono && yakumono.find(n) != yakumono.end()) {
 				switch (yakumono[n]) {
 				case 1:
@@ -2024,7 +2026,7 @@ int CFontGen::SaveFont(const char *szFile)
 						width,
 						height,
 						xoff,
-						chars[n]->m_yoffset,
+						yoff,
 						xadv,
 						page,
 						chnl
@@ -2038,7 +2040,7 @@ int CFontGen::SaveFont(const char *szFile)
 							width,
 							height,
 							xoff,
-							chars[n]->m_yoffset,
+							yoff,
 							xadv,
 							page
 					);
