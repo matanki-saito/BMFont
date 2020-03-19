@@ -133,6 +133,7 @@ public:
 	int     GetFontSize() const;           int SetFontSize(int fontSize);
 	bool    IsBold() const;                int SetBold(bool set);
 	bool    IsHalfYakumono() const;        int SetHalfYakumono(bool set);
+	bool    IsMap() const;                 int SetMap(bool set);
 	bool    IsItalic() const;              int SetItalic(bool set);
 	int     GetAntiAliasingLevel() const;  int SetAntiAliasingLevel(int level);
 	bool    IsUsingSmoothing() const;      int SetUseSmoothing(bool set);
@@ -228,6 +229,7 @@ protected:
 	bool   useSmoothing;
 	bool   isBold;
 	bool   isHalfYakumono;
+	bool   isMap;
 	bool   isItalic;
 	bool   useUnicode;
 	bool   renderFromOutline;

@@ -951,6 +951,7 @@ void CCharWin::OnChooseFont()
 	dlg.isBold                  = fontGen->IsBold();
 	dlg.isItalic                = fontGen->IsItalic();
 	dlg.isHalfYakumono          = fontGen->IsHalfYakumono();
+	dlg.isMap                   = fontGen->IsMap();
 	dlg.antiAliasing            = fontGen->GetAntiAliasingLevel();
 	dlg.useSmoothing            = fontGen->IsUsingSmoothing();
 	dlg.scaleH                  = fontGen->GetScaleHeight();
@@ -976,6 +977,7 @@ void CCharWin::OnChooseFont()
 		fontGen->SetFontSize(dlg.fontSize);
 		fontGen->SetBold(dlg.isBold);
 		fontGen->SetHalfYakumono(dlg.isHalfYakumono);
+		fontGen->SetMap(dlg.isMap);
 		fontGen->SetItalic(dlg.isItalic);
 		fontGen->SetAntiAliasingLevel(dlg.antiAliasing);
 		fontGen->SetUseSmoothing(dlg.useSmoothing);
