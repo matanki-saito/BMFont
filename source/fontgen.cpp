@@ -70,6 +70,7 @@ CFontGen::CFontGen()
 	isBold                 = false;
 	isItalic               = false;
 	isHalfYakumono         = false;
+	isMap                  = false;
 	useUnicode             = false;
 	paddingLeft            = 0;
 	paddingRight           = 0;
@@ -841,6 +842,15 @@ int CFontGen::SetHalfYakumono(bool set)
 	return 0;
 }
 
+int CFontGen::SetMap(bool set)
+{
+	if (isWorking) return -1;
+	arePagesGenerated = false;
+
+	isMap = set;
+	return 0;
+}
+
 int CFontGen::SetFontSize(int fontSize)
 {
 	if( isWorking ) return -1;
@@ -1037,6 +1047,11 @@ bool CFontGen::IsBold() const
 bool CFontGen::IsHalfYakumono() const
 {
 	return isHalfYakumono;
+}
+
+bool CFontGen::IsMap() const
+{
+	return isMap;
 }
 
 int CFontGen::GetAntiAliasingLevel() const
@@ -1971,11 +1986,13 @@ int CFontGen::SaveFont(const char *szFile)
 		}
 
 		// issue-21: https://github.com/matanki-saito/BMFont/issues/21
-		if (n == 10000 && chars[26397]) { // ✐ → 朝
-			chars[n] = chars[26397];
-		}
-		else if (n == 10001 && chars[27663]) { // ✑ → 氏 
-			chars[n] = chars[27663];
+		if (isMap) {
+			if (n == 10000 && chars[26397]) { // ✐ → 朝
+				chars[n] = chars[26397];
+			}
+			else if (n == 10001 && chars[27663]) { // ✑ → 氏 
+				chars[n] = chars[27663];
+			}
 		}
 
         if( chars[n] )
@@ -2494,6 +2511,7 @@ int CFontGen::LoadConfiguration(const char *filename)
 	bool   _useSmoothing;           config.GetAttrAsBool("useSmoothing", _useSmoothing, 0, true);
 	bool   _isBold;                 config.GetAttrAsBool("isBold", _isBold, 0, false);
 	bool   _isHalfYakumono;         config.GetAttrAsBool("isHalfYakumono", _isHalfYakumono, 0, false);
+	bool   _isMap;                  config.GetAttrAsBool("isMap", _isMap, 0, false);
 	bool   _isItalic;               config.GetAttrAsBool("isItalic", _isItalic, 0, false);
 	bool   _useUnicode;             config.GetAttrAsBool("useUnicode", _useUnicode, 0, true);
 	bool   _useHinting;             config.GetAttrAsBool("useHinting", _useHinting, 0, true);
@@ -2650,6 +2668,7 @@ int CFontGen::LoadConfiguration(const char *filename)
 	SetUseClearType(_useClearType);
 	SetBold(_isBold);
 	SetHalfYakumono(_isHalfYakumono);
+	SetMap(_isMap);
 	SetItalic(_isItalic);
 	SetUseUnicode(_useUnicode);
 	SetPaddingDown(_paddingDown);

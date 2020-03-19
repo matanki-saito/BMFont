@@ -49,6 +49,7 @@ public:
 	bool   isBold;
 	bool   isItalic;
 	bool   isHalfYakumono;
+	bool   isMap;
 	bool   useUnicode;
 	int    scaleH;
 	int    xScaleV;
